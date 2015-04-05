@@ -1,7 +1,7 @@
 [Variables]
 BarWidth=1
 BarHeight=(#WORKAREAHEIGHT#/32)
-BarGapX=12R
+BarGapX=24R
 BarGapY=0
 BarOrientation=Vertical
 
@@ -16,12 +16,12 @@ FreqMax=16000
 MeasureName=MeasureAudioRepeat
 MeterName=MeterBarRepeat
 
-Bands=128
+Bands=64
 Sensitivity=42
 
 Color=161,186,220,255
 
 Angle=270
-RainSpeed=100
+RainSpeed=200
 RainConstant=1
 RainCover=#WORKAREAHEIGHT#
