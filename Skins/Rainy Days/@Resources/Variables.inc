@@ -1,56 +1,46 @@
 [Variables]
 
-; Refresh the skin after updating these settings!
+; Save this text file and refresh the skin after editing these settings!
 
-
-; DISPLAY
-; =======
-
-Bands=64
+Bands=80
 ; Number of raindrops
-
-Color=128,160,255
+; Activate the GenerateBands.ini file after changing this value
 
 BarWidth=1
 ; Raindrop width
 
-BarHeight=(#WORKAREAHEIGHT#/8)
+BarHeight=175
 ; Maximum raindrop height
-; "#WORKAREAHEIGHT#" is generally your monitor's height
-; http://docs.rainmeter.net/manual-beta/variables/built-in-variables#WORKAREAXYWH
 
 BarGap=24
-; Gap between the raindrops
+; Spacing between the raindrops
 
+Color=128,160,255
+; Don't add an alpha value at the end
 
-; MECHANICS
-; =========
-
-RainSpeed=100
+RainSpeed=80
 ; Rainfall speed
 
-RainConstant=1
+RainConstant=3
 ; Rainfall speed when no sound is playing
 
 RainCover=#WORKAREAHEIGHT#
 ; Rainfall height
 
+AverageSize=5
+; Number of past measure values to average from, increasing continuity
 
-; AUDIO
-; =====
-
-Sensitivity=42
-; Increase this if the spectrum is not visible enough
-
-FFTAttack=350
-FFTDecay=350
-; Decrease for faster response, increase for slower response
-; http://docs.rainmeter.net/manual-beta/plugins/audiolevel#FFTAttack
-
-FFTSize=2048
-FFTOverlap=(#FFTSize#/2)
-FreqMin=40
-FreqMax=16000
 Port=Output
-; Additional audio settings
-; http://docs.rainmeter.net/manual-beta/plugins/audiolevel#FFTOptions
+ID=""
+FFTSize=9216
+FFTOverlap=(#FFTSize#*0.5)
+FFTAttack=0
+FFTDecay=250
+FreqMin=20
+FreqMax=16000
+Sensitivity=35
+; http://docs.rainmeter.net/manual-beta/plugins/audiolevel
+
+; Context menu environment variables
+Config=Rainy Days
+ConfigPath=C:\Users\YourName\My Documents\Rainmeter\Skins\Rainy Days\Rainy Days.ini
