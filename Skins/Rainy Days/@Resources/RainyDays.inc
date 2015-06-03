@@ -35,7 +35,7 @@ UpdateDivider=1
 
 ; Hide meters and disable measures when idle
 IfCondition=(MeasureAudio < 0.000000000000000001)
-IfTrueAction=[!DisableMeasure MeasureAudio][!DisableMeasure ScriptRainyDays][!HideMeterGroup Bars][!HideMeter BoundingBox]
+IfTrueAction=[!DisableMeasure MeasureAudio][!DisableMeasure ScriptRainyDays][!HideMeterGroup Bars][!HideMeter BoundingBox][!SetOptionGroup Bars Y 0]
 
 [Standby]
 Measure=Plugin
@@ -81,4 +81,3 @@ Meter=Bar
 H=#RainCover#
 BarColor=255,255,255,0
 MeasureName=MeasureDummy
-UpdateDivider=-1
