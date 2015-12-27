@@ -4,8 +4,7 @@ Group=Audio
 Plugin=AudioLevel
 Parent=MeasureAudio
 Type=Band
-BandIdx=(Abs((#Invert# = 1 ? #Bands# : 0)-Repeat))
-
-[MeterBarRepeat]
-Meter=Bar
-MeasureName=MeasureAudioRepeat
+BandIdx=(Abs((#Invert# = 1 ? (#FirstBandIndex# + #Bands# - 1) : 0) - Repeat))
+[MeterRotatorRepeat]
+Meter=Rotator
+MeasureName=MeasureDummy

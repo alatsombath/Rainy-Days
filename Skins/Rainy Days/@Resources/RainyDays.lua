@@ -1,62 +1,36 @@
--- RainyDays v1.3
+-- RainyDays v2.0
 -- LICENSE: Creative Commons Attribution-Non-Commercial-Share Alike 3.0
 
-local HeightLookup,PositionY,Measure,Meter={},{},{},{}
+local measure, meter, heightLookup, positionY = {}, {}, {}, {}
 
 function Initialize()
-
-	RainSpeed,RainConstant=SKIN:ParseFormula(SKIN:ReplaceVariables("#RainSpeed#")),SKIN:ParseFormula(SKIN:ReplaceVariables("#RainConstant#"))
-	
-	-- Iteration control variables
-	Sub,Index,Limit=SELF:GetOption("Sub"),SKIN:ParseFormula(SELF:GetNumberOption("Index")),SKIN:ParseFormula(SELF:GetOption("Limit"))
-	
-	-- Rainfall height (rounded for indexing)
-	RainCover=math.floor(SKIN:ParseFormula(SKIN:ReplaceVariables("#RainCover#"))+0.5)
-
-	-- Raindrop height
-	BarHeight=SKIN:ParseFormula(SKIN:ReplaceVariables("#BarHeight#"))
-	
-	-- Establish halfway point as half the skin height (rounded for indexing)
-	RainDivider=math.floor((RainCover*0.5)+0.5)
-	
-	-- Generate height lookup table
-	for i=Index,RainDivider do HeightLookup[i]=BarHeight*(i/RainDivider) end
-	
-	-- Retrieve measures and meters, store in tables
-	local MeasureName,MeterName,gsub=SELF:GetOption("MeasureName"),SELF:GetOption("MeterName"),string.gsub
-	for i=Index,Limit do
-		PositionY[i],Measure[i],Meter[i]=0,SKIN:GetMeasure((gsub(MeasureName,Sub,i))),SKIN:GetMeter((gsub(MeterName,Sub,i)))
-	end
-
+  floor = math.floor
+  multiplier, constant = SELF:GetNumberOption("Multiplier"), SELF:GetNumberOption("Constant")
+  cover, meterHeight = floor(SELF:GetNumberOption("Cover") + 0.5), SELF:GetNumberOption("MeterHeight")
+  lowerLimit, upperLimit = SELF:GetNumberOption("LowerLimit") + 1, SELF:GetNumberOption("UpperLimit") + 1
+  
+  rainDivider = floor(cover * 0.5 + 0.5)
+  for i = 0, rainDivider do heightLookup[i] = meterHeight * (i / rainDivider) end
+  
+  for i = lowerLimit, upperLimit do
+    measure[i], meter[i] = SKIN:GetMeasure(SELF:GetOption("MeasureBaseName") .. i-1), SKIN:GetMeter(SELF:GetOption("MeterBaseName") .. i-1)
+	positionY[i] = math.random(0, cover)
+  end
 end
 
 function Update()
+  for i = lowerLimit, upperLimit do
+  
+    positionY[i] = (positionY[i] + multiplier * measure[i]:GetValue() + constant) % cover
 	
-	local RainDivider,HeightLookup,BarHeight,Meter=RainDivider,HeightLookup,BarHeight,Meter
-	
-	-- For each raindrop
-	for i=Index,Limit do
-		
-		-- Increase the Y position of the raindrop based on the measure value and control variables
-		-- Reset when it reaches the bottom of the skin
-		PositionY[i]=(PositionY[i]+RainSpeed*Measure[i]:GetValue()+RainConstant+0.5)%RainCover
-		
-		-- Cache the Y position (rounded for indexing)
-		local PositionY=PositionY[i]-PositionY[i]%1
-		
-		-- Check for invalid index
-		if PositionY==0 then PositionY=1 end
-		
-		-- Set the raindrop height based on whether it has crossed the halfway point
-		if PositionY<=RainDivider then
-			Meter[i]:SetH(HeightLookup[PositionY])
-		else
-			Meter[i]:SetH(BarHeight-HeightLookup[PositionY-RainDivider])
-		end
-
-		-- Move the Y position of the meter
-		Meter[i]:SetY(PositionY)
-		
+	local positionY = floor(positionY[i] + 0.5)
+    
+    if positionY <= rainDivider then
+	  meter[i]:SetH(heightLookup[positionY])
+	else
+	  meter[i]:SetH(meterHeight - heightLookup[positionY - rainDivider])
 	end
-	
+    
+	meter[i]:SetY(positionY)
+  end
 end
