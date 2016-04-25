@@ -15,9 +15,9 @@ BarHeight=81
 BarGap=56
 ; Spacing between the raindrops
 
-RainSpeed=40
+RainSpeed=50
 
-RainConstant=2
+RainConstant=1
 ; Falling speed when no sound is playing
 
 RainCover=#WORKAREAHEIGHT#
@@ -29,19 +29,23 @@ AverageSize=0
 LoudnessEqualization=1
 ; Increases visibility for quiet audio sources when applicable
 
-FFTSize=10240
-FFTOverlap="(#FFTSize#-256)"
+FFTSize=1024
+FFTOverlap="(#FFTSize#-512)"
 FFTAttack=0
 FFTDecay=0
-FreqMin=20
-FreqMax=20000
-Sensitivity=17
+FreqMin=30
+FreqMax=10000
+Sensitivity=24
 ; http://docs.rainmeter.net/manual-beta/plugins/audiolevel
 
 MusicPlayer=None
-; Music player process name
+; Music player process name, such as "VLC" (not "VLC.exe")
 
 FirstBandIndex=1
+; "0" band should be skipped for aesthetic purpose
+
+IdleAudioTimeout=1
+; How long before hiding the visualizer when no sound is playing
 
 ; Environment variables for settings window
 SkinGroup=RainyDays

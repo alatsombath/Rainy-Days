@@ -22,27 +22,6 @@ EnvConfigPath=[!WriteKeyValue Variables ConfigPath "#CURRENTPATH##CURRENTFILE#" 
 EnvSettingsWindow=#EnvSlant##EnvInvert#EnvChannel##EnvPort##EnvID##EnvConfig##EnvConfigPath#
 OpenSettingsWindow=#EnvSettingsWindow#[!ActivateConfig "#ROOTCONFIG#\SettingsWindow"][!Refresh "#ROOTCONFIG#\SettingsWindow"]
 
-[MeasureAudio]
-Measure=Plugin
-Plugin=AudioLevel
-Port=#Port#
-ID=#ID#
-RMSAttack=0
-RMSDecay=0
-RMSGain=1
-PeakAttack=0
-PeakDecay=0
-PeakGain=1
-FFTSize=#FFTSize#
-FFTOverlap=#FFTOverlap#
-FFTAttack=#FFTAttack#
-FFTDecay=#FFTDecay#
-Bands=#Bands#
-FreqMin=#FreqMin#
-FreqMax=#FreqMax#
-Sensitivity=#Sensitivity#
-UpdateDivider=1
-
 [DisableProcessCheck]
 Measure=String
 String=#MusicPlayer#
@@ -54,6 +33,20 @@ IfNotMatchAction=[!SetOption MeasureProcess UpdateDivider 62.5]
 Measure=Plugin
 Plugin=Process
 ProcessName=#MusicPlayer#.exe
+
+[IdleAudioTimeout]
+Measure=Calc
+Formula=(IdleAudioTimeout + 1)
+IfCondition=(IdleAudioTimeout = (Floor(62.5 * #IdleAudioTimeout#)))
+IfTrueAction=[!DisableMeasure MeasureAudio][!DisableMeasureGroup Audio][!DisableMeasure DynamicSensitivity][!DisableMeasure IdleAudioTimeout]
+UpdateDivider=1
+
+[IdleAudioTimeout2]
+Measure=Calc
+Formula=(IdleAudioTimeout2 + 1)
+IfCondition=(IdleAudioTimeout2 = (Floor(62.5 * #IdleAudioTimeout#)))
+IfTrueAction=[!DisableMeasure ScriptRainyDays][!HideMeterGroup Rotators][!SetOptionGroup Rotators Y 0][!HideMeter BoundingBox][!DisableMeasure IdleAudioTimeout2]
+UpdateDivider=1
 
 [Standby]
 Measure=Plugin
@@ -68,34 +61,46 @@ PeakDecay=0
 PeakGain=1
 UpdateDivider=1
 
-; Toggle measures/meters based on idle audio, music player running status, and constant rotation
+; Toggle measures/meters based on idle audio, music player running status, and constant falling
 IfCondition=((Standby > 0.00001) && ((DisableProcessCheck = 1) || (MeasureProcess = 1)) && (#RainConstant# = 0))
-IfTrueAction=[!EnableMeasure ScriptRainyDays][!ShowMeterGroup Rotators][!ShowMeter BoundingBox]
-IfFalseAction=[!DisableMeasure ScriptRainyDays][!HideMeterGroup Rotators][!SetOptionGroup Rotators Y 0][!HideMeter BoundingBox]
+IfTrueAction=[!DisableMeasure IdleAudioTimeout2][!EnableMeasure ScriptRainyDays][!ShowMeterGroup Rotators][!ShowMeter BoundingBox]
+IfFalseAction=[!EnableMeasure IdleAudioTimeout2]
 IfCondition2=(#RainConstant# <> 0)
-IfTrueAction2=[!EnableMeasure ScriptRainyDays][!ShowMeterGroup Rotators][!ShowMeter BoundingBox]
+IfTrueAction2=[!DisableMeasure IdleAudioTimeout2][!EnableMeasure ScriptRainyDays][!ShowMeterGroup Rotators][!ShowMeter BoundingBox]
 IfCondition3=((Standby > 0.00001) && ((DisableProcessCheck = 1) || (MeasureProcess = 1)))
-IfTrueAction3=[!EnableMeasureGroup Audio][!EnableMeasure MeasureAudio][!EnableMeasure DynamicSensitivity][!EnableMeasure DynamicFFTDecay]
-IfFalseAction3=[!DisableMeasureGroup Audio][!DisableMeasure MeasureAudio][!DisableMeasure DynamicSensitivity][!DisableMeasure DynamicFFTDecay]
+IfTrueAction3=[!DisableMeasure IdleAudioTimeout][!EnableMeasure MeasureAudio][!EnableMeasureGroup Audio][!EnableMeasure DynamicSensitivity]
+IfFalseAction3=[!EnableMeasure IdleAudioTimeout]
+
+[MeasureAudio]
+Measure=Plugin
+Plugin=AudioLevel
+Port=#Port#
+ID=#ID#
+RMSAttack=0
+RMSDecay=0
+RMSGain=1
+PeakAttack=0
+PeakDecay=0
+PeakGain=1
+FFTSize=#FFTSize#
+FFTOverlap=(Min(#FFTOverlap#, (#FFTSize#-512)))
+FFTAttack=#FFTAttack#
+FFTDecay=#FFTDecay#
+Bands=#Bands#
+FreqMin=#FreqMin#
+FreqMax=#FreqMax#
+Sensitivity=#Sensitivity#
+UpdateDivider=1
 
 [DynamicSensitivity]
 Measure=Calc
-Formula=(#Sensitivity# - (MeasureAudio * 100 - #Sensitivity#))
-IfCondition=((DynamicSensitivity > #Sensitivity#) && (#LoudnessEqualization# = 1))
+Formula=(Max(#Sensitivity#, Min(Abs(20 * Log(MeasureAudio)) + Abs(20 * Log(0.5)), 0.5 * Abs(20 * Log(1/65535)))))
+IfCondition=(#LoudnessEqualization# = 1)
 IfTrueAction=[!SetOption MeasureAudio Sensitivity [DynamicSensitivity]]
 IfConditionMode=1
 UpdateDivider=1
-; Average over the past 3 seconds to prevent stuttering
-AverageSize=188
-
-[DynamicFFTDecay]
-Measure=Calc
-Formula=(#FFTDecay# + (MeasureAudio * 100 - #Sensitivity#) * 10)
-IfCondition=((DynamicSensitivity > #Sensitivity#) && (#LoudnessEqualization# = 1))
-IfTrueAction=[!SetOption MeasureAudio FFTDecay [DynamicFFTDecay]]
-IfConditionMode=1
-UpdateDivider=1
-AverageSize=188
+; Average over the past 0.5 seconds to prevent stuttering
+AverageSize=31
 
 @Include=#@#Bands.inc
 
